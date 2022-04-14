@@ -6,6 +6,9 @@
 	import injectedModule from '@web3-onboard/injected-wallets';
 	import walletConnectModule from '@web3-onboard/walletconnect';
 
+	const icon = 'logo-icon-black.svg';
+	const logo = 'logo-black.svg';
+
 	const injected = injectedModule();
 	const walletConnect = walletConnectModule();
 
@@ -21,8 +24,8 @@
 		],
 		appMetadata: {
 			name: 'Shield Protocol',
-			icon: '<SVG_ICON_STRING>',
-			logo: '<SVG_LOGO_STRING>',
+			icon: icon,
+			logo: logo,
 			description: 'Research tokens smarter and faster.'
 			// recommendedInjectedWallets: [
 			// 	{ name: 'MetaMask', url: 'https://metamask.io' },
@@ -53,6 +56,7 @@
 	};
 </script>
 
+<!-- <img src={icon} alt="" /> -->
 <div class="mx-4 flex h-10 items-center justify-center">
 	{#if !$connected}
 		<button on:click={connect} class="h-full rounded-2xl border-2 border-solid border-transparent bg-blue-100 py-1 px-4 font-RedHatMono text-sm font-semibold transition-all ease-out hover:border-blue-200">Connect Wallet</button>
