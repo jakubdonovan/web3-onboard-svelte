@@ -1,5 +1,6 @@
 <script>
-	// import { ethers } from 'ethers';
+	import { onMount, onDestroy } from 'svelte';
+	import { ethers } from 'ethers';
 	import { defaultEvmStores, connected, provider, chainId, chainData, signer, signerAddress, contracts } from 'svelte-ethers-store';
 
 	import Onboard from '@web3-onboard/core';
@@ -9,10 +10,10 @@
 	const injected = injectedModule();
 	const walletConnect = walletConnectModule();
 
-	import { onMount } from 'svelte';
-
 	let onboard;
-	onMount(() => {
+	let state;
+
+	onMount(async () => {
 		onboard = Onboard({
 			wallets: [injected, walletConnect],
 			chains: [
@@ -40,20 +41,48 @@
 				}
 			}
 		});
+
+		state = onboard.state.select();
+		const { unsubscribe } = state.subscribe(async (update) => {
+			// connected event
+			if (update.wallets) {
+				console.log('CONNECTED EVENT TRIGGERED');
+
+				// set svelte-ethers-stores provider to make stores usable
+				await defaultEvmStores.setProvider(update.wallets[0].provider);
+				console.log('STORES SET:', $connected, $signerAddress, $signer, $provider);
+
+				// add wallet to localstorage
+				const connectedWallets = update.wallets.map(({ label }) => label);
+				window.localStorage.setItem('connectedWallets', JSON.stringify(connectedWallets));
+			}
+			// disconnected event
+			if (!update.wallets) {
+				console.log('DISCONNECTED');
+			}
+
+			// account changed event ??????
+			// contract transaction filter event ??????
+		});
+
+		// unsubscribe() // should probably go in onDestroy but not sure how to use this function outside of the scope of onMount
+
+		// reconnect from localstorage on reload
+		const previouslyConnectedWallets = JSON.parse(window.localStorage.getItem('connectedWallets'));
+		if (previouslyConnectedWallets) {
+			await onboard.connectWallet({
+				autoSelect: { label: previouslyConnectedWallets[0], disableModals: true }
+			});
+		}
 	});
 
-	const connect = async () => {
-		let wallets = await onboard.connectWallet();
-		await defaultEvmStores.setProvider(wallets[0].provider);
-
-		console.log('CONNECTED:', $connected, $signerAddress, $signer, $provider);
-	};
+	const connect = async () => await onboard.connectWallet();
 
 	const disconnect = async () => {
 		const [primaryWallet] = await onboard.state.get().wallets;
 		await onboard.disconnectWallet({ label: primaryWallet.label });
 
-		console.log('DISCONNECTED:', $connected, $signerAddress, $signer, $provider);
+		console.log('DISCONNECTED: (stores should be undefined)', $connected, $signerAddress, $signer, $provider);
 	};
 </script>
 
