@@ -53,7 +53,6 @@
 	};
 </script>
 
-<!-- <img src={icon} alt="" /> -->
 <div class="mx-4 flex h-10 items-center justify-center">
 	{#if !$connected}
 		<button on:click={connect} class="h-full rounded-2xl border-2 border-solid border-transparent bg-blue-100 py-1 px-4 font-RedHatMono text-sm font-semibold transition-all ease-out hover:border-blue-200">Connect Wallet</button>
