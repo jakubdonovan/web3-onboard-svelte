@@ -9,44 +9,48 @@
 	const injected = injectedModule();
 	const walletConnect = walletConnectModule();
 
-	const onboard = Onboard({
-		wallets: [injected, walletConnect],
-		chains: [
-			{
-				id: '0x1',
-				token: 'ETH',
-				label: 'Ethereum Mainnet',
-				rpcUrl: 'https://mainnet.infura.io/v3/0ef6bd5de679422084aab6bc04e10fcc'
+	import { onMount } from 'svelte';
+
+	let onboard;
+	onMount(() => {
+		onboard = Onboard({
+			wallets: [injected, walletConnect],
+			chains: [
+				{
+					id: '0x1',
+					token: 'ETH',
+					label: 'Ethereum Mainnet',
+					rpcUrl: 'https://mainnet.infura.io/v3/0ef6bd5de679422084aab6bc04e10fcc'
+				}
+			],
+			appMetadata: {
+				name: 'Shield Protocol',
+				icon: 'logo-icon-black.svg',
+				logo: 'logo-black.svg',
+				description: 'Research tokens smarter and faster.'
+				// recommendedInjectedWallets: [
+				// 	{ name: 'MetaMask', url: 'https://metamask.io' },
+				// 	{ name: 'WalletConnect', url: 'https://walletconnect.com/' }
+				// ]
+			},
+			accountCenter: {
+				desktop: {
+					position: 'topRight',
+					enabled: true
+				}
 			}
-		],
-		appMetadata: {
-			name: 'Shield Protocol',
-			icon: 'logo-icon-black.svg',
-			logo: 'logo-black.svg',
-			description: 'Research tokens smarter and faster.'
-			// recommendedInjectedWallets: [
-			// 	{ name: 'MetaMask', url: 'https://metamask.io' },
-			// 	{ name: 'WalletConnect', url: 'https://walletconnect.com/' }
-			// ]
-		},
-		accountCenter: {
-			desktop: {
-				position: 'topRight',
-				enabled: true
-			}
-		}
+		});
 	});
 
 	const connect = async () => {
-		let wallets;
-		defaultEvmStores.setProvider(wallets);
-		wallets = await onboard.connectWallet();
+		let wallets = await onboard.connectWallet();
+		await defaultEvmStores.setProvider(wallets[0].provider);
 
 		console.log('CONNECTED:', $connected, $signerAddress, $signer, $provider);
 	};
 
 	const disconnect = async () => {
-		const [primaryWallet] = onboard.state.get().wallets;
+		const [primaryWallet] = await onboard.state.get().wallets;
 		await onboard.disconnectWallet({ label: primaryWallet.label });
 
 		console.log('DISCONNECTED:', $connected, $signerAddress, $signer, $provider);
