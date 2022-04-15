@@ -77,7 +77,7 @@
 
 		// reconnect from localstorage on reload
 		const previouslyConnectedWallets = JSON.parse(window.localStorage.getItem('connectedWallets'));
-		if (previouslyConnectedWallets.length !== 0) {
+		if (previouslyConnectedWallets) {
 			await onboard.connectWallet({
 				autoSelect: { label: previouslyConnectedWallets[0], disableModals: true }
 			});
@@ -93,15 +93,19 @@
 		state = onboard.state.select();
 		const { unsubscribe } = state.subscribe(async (update) => {
 			// connected event
-			if (update.wallets) {
-				console.log('first time');
+			if (update.wallets.length !== 0) {
+				console.log('Connected:', update.wallets);
 
 				// add wallet to localstorage
 				const connectedWallets = update.wallets.map(({ label }) => label);
 				window.localStorage.setItem('connectedWallets', JSON.stringify(connectedWallets));
 			}
 
-			// disconnected event
+			if (update.wallets.length === 0) {
+				console.log('Disconnected:', update.wallets);
+				defaultEvmStores.disconnect();
+			}
+
 			// account changed event ??????
 			// contract transaction filter event ??????
 		});
@@ -116,6 +120,7 @@
 		const [primaryWallet] = await onboard.state.get().wallets;
 		await onboard.disconnectWallet({ label: primaryWallet.label });
 		defaultEvmStores.disconnect();
+		window.localStorage.removeItem('connectedWallets');
 	};
 </script>
 
