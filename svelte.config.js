@@ -8,6 +8,9 @@ const development = process.env.NODE_ENV === 'development';
 const config = {
 	kit: {
 		adapter: adapter(),
+		prerender: {
+			enabled: false
+		},
 
 		vite: {
 			plugins: [
