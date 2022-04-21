@@ -2,78 +2,186 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { ethers } from 'ethers';
 	import { defaultEvmStores, connected, provider, chainId, chainData, signer, signerAddress, contracts } from 'svelte-ethers-store';
-
 	import Onboard from '@web3-onboard/core';
 	import injectedModule from '@web3-onboard/injected-wallets';
 	import walletConnectModule from '@web3-onboard/walletconnect';
+	import ledgerModule from '@web3-onboard/ledger';
+	import trezorModule from '@web3-onboard/trezor';
+	// import gnosisModule from '@web3-onboard/gnosis';
+	// import coinbaseModule from '@web3-onboard/coinbase'
+	// import keystoneModule from '@web3-onboard/keystone'
+	// import torusModule from '@web3-onboard/torus'
+	import fortmaticModule from '@web3-onboard/fortmatic';
+	import portisModule from '@web3-onboard/portis';
+	import magicModule from '@web3-onboard/magic';
+
 	const injected = injectedModule();
 	const walletConnect = walletConnectModule();
-
-	// import ledgertModule from '@web3-onboard/ledger';
-	// import trezorModule from '@web3-onboard/trezor';
-	// import gnosisModule from '@web3-onboard/gnosis';
-
-	// const ledger = ledgertModule();
-	// const trezor = trezorModule({
-	// 	email: 'admin@shieldprotocol.io',
-	// 	appUrl: 'shieldprotocol.io'
-	// });
+	const ledger = ledgerModule();
+	const trezor = trezorModule({
+		email: 'admin@shieldprotocol.io',
+		appUrl: 'shieldprotocol.io'
+	});
 	// const gnosis = gnosisModule();
+	// const coinbase = coinbaseModule()
+	// const keystone = keystoneModule()
+	// const torus = torusModule()
+	const portis = portisModule({
+		apiKey: 'b2b7586f-2b1e-4c30-a7fb-c2d1533b153b'
+	});
+	const fortmatic = fortmaticModule({
+		apiKey: 'pk_test_886ADCAB855632AA'
+	});
+	const magic = magicModule({
+		apiKey: 'pk_live_02207D744E81C2BA'
+		// userEmail: 'test@test.com'
+		// userEmail is optional - if user has already logged in and/or session is still active a login modal will not appear
+		// for more info see the @web3-onboard/magic docs
+	});
 
-	let onboard;
-	let state;
-
-	onMount(async () => {
-		onboard = Onboard({
-			wallets: [injected, walletConnect],
-			chains: [
-				{
-					id: '0x1',
-					token: 'ETH',
-					label: 'Ethereum Mainnet',
-					rpcUrl: 'https://mainnet.infura.io/v3/0ef6bd5de679422084aab6bc04e10fcc'
-				}
-			],
-			appMetadata: {
-				name: 'Shield Protocol',
-				icon: 'logo-icon-black.svg',
-				logo: 'logo-black.svg',
-				description: 'Research tokens smarter and faster.'
-				// recommendedInjectedWallets: [
-				// 	{ name: 'MetaMask', url: 'https://metamask.io' },
-				// 	{ name: 'WalletConnect', url: 'https://walletconnect.com/' }
-				// ]
-			},
-			accountCenter: {
-				desktop: {
-					enabled: true,
-					position: 'topRight'
-				}
-			},
-			i18n: {
-				en: {
-					connect: {
-						selectingWallet: {
-							// header: '',
-							sidebar: {
-								heading: '',
-								subheading: 'Connect your wallet'
-								// paragraph: ''
-							},
-							recommendedWalletsPart1: '',
-							recommendedWalletsPart2: ''
-							// installWallet: ''
-							// agreement: {
-							// 	agree: '',
-							// 	terms: '',
-							// 	and: '',
-							// 	privacy: ''
-							// }
-						}
+	// let onboard;
+	let onboard = Onboard({
+		wallets: [
+			injected,
+			walletConnect,
+			ledger,
+			trezor,
+			// gnosis,
+			// coinbase //coinbaseSDK is not a constructor
+			// keystone, //AirGappedKeyring.getEmptyKeyring is not a function
+			// torus //https.Agent is not a constructor
+			portis,
+			fortmatic,
+			magic
+		],
+		chains: [
+			{
+				id: '0x1',
+				token: 'ETH',
+				label: 'Ethereum Mainnet',
+				rpcUrl: 'https://mainnet.infura.io/v3/0ef6bd5de679422084aab6bc04e10fcc'
+			}
+		],
+		appMetadata: {
+			name: 'Shield Protocol',
+			icon: 'logo-icon-black.svg',
+			logo: 'logo-black.svg',
+			description: 'Research tokens smarter and faster.'
+			// recommendedInjectedWallets: [
+			// 	{ name: 'MetaMask', url: 'https://metamask.io' },
+			// 	{ name: 'WalletConnect', url: 'https://walletconnect.com/' }
+			// ]
+		},
+		accountCenter: {
+			desktop: {
+				enabled: true,
+				position: 'topRight'
+			}
+		},
+		i18n: {
+			en: {
+				connect: {
+					selectingWallet: {
+						// header: '',
+						sidebar: {
+							heading: '',
+							subheading: 'Connect your wallet'
+							// paragraph: ''
+						},
+						recommendedWalletsPart1: '',
+						recommendedWalletsPart2: ''
+						// installWallet: ''
+						// agreement: {
+						// 	agree: '',
+						// 	terms: '',
+						// 	and: '',
+						// 	privacy: ''
+						// }
 					}
 				}
 			}
-		});
+		}
+	});
+	let state = onboard.state.select();
+
+	onMount(async () => {
+		// onboard = Onboard({
+		// 	wallets: [
+		// 		injected,
+		// 		walletConnect,
+		// 		ledger,
+		// 		trezor,
+		// 		// gnosis,
+		// 		// coinbase //coinbaseSDK is not a constructor
+		// 		// keystone, //AirGappedKeyring.getEmptyKeyring is not a function
+		// 		// torus //https.Agent is not a constructor
+		// 		portis,
+		// 		fortmatic,
+		// 		magic
+		// 	],
+		// 	chains: [
+		// 		{
+		// 			id: '0x1',
+		// 			token: 'ETH',
+		// 			label: 'Ethereum Mainnet',
+		// 			rpcUrl: 'https://mainnet.infura.io/v3/0ef6bd5de679422084aab6bc04e10fcc'
+		// 		}
+		// 	],
+		// 	appMetadata: {
+		// 		name: 'Shield Protocol',
+		// 		icon: 'logo-icon-black.svg',
+		// 		logo: 'logo-black.svg',
+		// 		description: 'Research tokens smarter and faster.'
+		// 		// recommendedInjectedWallets: [
+		// 		// 	{ name: 'MetaMask', url: 'https://metamask.io' },
+		// 		// 	{ name: 'WalletConnect', url: 'https://walletconnect.com/' }
+		// 		// ]
+		// 	},
+		// 	accountCenter: {
+		// 		desktop: {
+		// 			enabled: true,
+		// 			position: 'topRight'
+		// 		}
+		// 	},
+		// 	i18n: {
+		// 		en: {
+		// 			connect: {
+		// 				selectingWallet: {
+		// 					// header: '',
+		// 					sidebar: {
+		// 						heading: '',
+		// 						subheading: 'Connect your wallet'
+		// 						// paragraph: ''
+		// 					},
+		// 					recommendedWalletsPart1: '',
+		// 					recommendedWalletsPart2: ''
+		// 					// installWallet: ''
+		// 					// agreement: {
+		// 					// 	agree: '',
+		// 					// 	terms: '',
+		// 					// 	and: '',
+		// 					// 	privacy: ''
+		// 					// }
+		// 				}
+		// 			}
+		// 		}
+		// 	}
+		// });
+
+		// attach shield contract to contracts store
+		const abi = [
+			// Read-Only Functions
+			'function balanceOf(address owner) view returns (uint256)',
+			'function decimals() view returns (uint8)',
+			'function symbol() view returns (string)',
+
+			// Authenticated Functions
+			'function transfer(address to, uint amount) returns (bool)',
+
+			// Events
+			'event Transfer(address indexed from, address indexed to, uint amount)'
+		];
+		defaultEvmStores.attachContract('SHIELD', '0x24861414c8845b8115397302e9dcfaab3f239826', abi);
 
 		// reconnect from localstorage on reload
 		const previouslyConnectedWallets = JSON.parse(window.localStorage.getItem('connectedWallets'));
@@ -90,19 +198,15 @@
 		}
 
 		// subscribe to state changes
-		state = onboard.state.select();
 		const { unsubscribe } = state.subscribe(async (update) => {
 			// connected event
 			if (update.wallets.length !== 0) {
-				console.log('Connected:', update.wallets);
-
 				// add wallet to localstorage
 				const connectedWallets = update.wallets.map(({ label }) => label);
 				window.localStorage.setItem('connectedWallets', JSON.stringify(connectedWallets));
 			}
 
 			if (update.wallets.length === 0) {
-				console.log('Disconnected:', update.wallets);
 				defaultEvmStores.disconnect();
 			}
 
@@ -113,43 +217,34 @@
 
 	const connect = async () => {
 		const instance = await onboard.connectWallet();
-		defaultEvmStores.setProvider(instance[0].provider);
+		if (instance.length === 1) {
+			defaultEvmStores.setProvider(instance[0].provider);
+		}
 	};
 
 	const disconnect = async () => {
 		const [primaryWallet] = await onboard.state.get().wallets;
 		await onboard.disconnectWallet({ label: primaryWallet.label });
 		defaultEvmStores.disconnect();
+
+		// remove from localstorage
 		window.localStorage.removeItem('connectedWallets');
+	};
+
+	const getShieldBalance = async () => {
+		const balance = await $contracts.SHIELD.balanceOf($signerAddress);
+
+		console.log(balance / 10 ** 9);
+		return balance / 10 ** 9;
 	};
 </script>
 
 <div class="mx-4 flex h-10 items-center justify-center">
 	{#if !$connected}
 		<button on:click={connect} class="h-full rounded-2xl border-2 border-solid border-transparent bg-blue-100 py-1 px-4 font-RedHatMono text-sm font-semibold transition-all ease-out hover:border-blue-200">Connect Wallet</button>
-	{:else}
-		<button on:click={disconnect} class="h-full rounded-2xl border-2 border-solid border-transparent bg-blue-100 py-1 px-4 font-RedHatMono text-sm font-semibold transition-all ease-out hover:border-blue-200">Disconnect</button>
 	{/if}
 </div>
 
-<!-- // edit modal
-if (document.querySelector('onboard-v2').shadowRoot.children[2]) {
-    const target = document.querySelector('onboard-v2').shadowRoot.children[2];
-    if (target.querySelector('.network')) {
-        const network = target.querySelector('.network');
-        console.log(network);
-    }
-    network.style.display = 'none';
-    target.style.minWidth = '200px';
-
-    if (target.querySelector('.network-container')) {
-        const networkInside = target.querySelector('.network-container').children[0];
-        networkInside.style.display = 'none';
-
-        const poweredBy = target.querySelector('.powered-by-container');
-        poweredBy.style.display = 'none';
-    }
-} -->
 <style>
 	:global(:root) {
 		/* CUSTOMIZE THE COLOR  PALLETTE */
@@ -196,7 +291,7 @@ if (document.querySelector('onboard-v2').shadowRoot.children[2]) {
 		/* --onboard-connect-content-width */
 		/* --onboard-connect-content-height */
 
-		--onboard-wallet-columns: 1;
+		--onboard-wallet-columns: 2;
 		/* --onboard-connect-sidebar-background
         /* --onboard-connect-sidebar-color */
 		/* --onboard-connect-sidebar-progress-background */
